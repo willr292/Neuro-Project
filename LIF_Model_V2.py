@@ -6,7 +6,6 @@ from elephant.spike_train_generation import homogeneous_poisson_process
 from elephant.statistics import mean_firing_rate
 import seaborn as sns
 import json
-import pandas as pd
 
 with open('neuronal_model_603320017/neuron_config.json') as json_file:  
     data = json.load(json_file)
@@ -86,12 +85,13 @@ def poisson_spike_trains(rate, big_t, tau_ref):
 
     return spike_train
 
-e_spike_train = np.asarray([homogeneous_poisson_process(rate=rate_e*Hz, t_start=0.0*s, t_stop=1.0*s, as_array=True) for i in range(1)])#poisson_spike_trains(rate_e, T, 0)
-i_spike_train = np.asarray([homogeneous_poisson_process(rate=rate_i*Hz, t_start=0.0*s, t_stop=1.0*s, as_array=True) for i in range(1)])#poisson_spike_trains(rate_i, T, 0)
-e_spike_train[:] = np.round_(e_spike_train[:] / dt)
-i_spike_train[:] = np.round_(i_spike_train[:] / dt)
 
-def LIF_R_ASC_AT(we, wi):
+
+def LIF_R_ASC_AT(we, wi, rateE, rateI):
+    e_spike_train = np.asarray([homogeneous_poisson_process(rate=rateE*Hz, t_start=0.0*s, t_stop=1.0*s, as_array=True) for i in range(1)])#poisson_spike_trains(rate_e, T, 0)
+    i_spike_train = np.asarray([homogeneous_poisson_process(rate=rateI*Hz, t_start=0.0*s, t_stop=1.0*s, as_array=True) for i in range(1)])#poisson_spike_trains(rate_i, T, 0)
+    e_spike_train[:] = np.round_(e_spike_train[:] / dt)
+    i_spike_train[:] = np.round_(i_spike_train[:] / dt)
     spikes = []
     for i in range(1, len(time)):
         dTheta_s = -b_s * Theta_s[i - 1]
@@ -131,7 +131,7 @@ def LIF_R_ASC_AT(we, wi):
         
     return np.asarray(spikes)
 
-spike = LIF_R_ASC_AT(w_e, w_i)
+spike = LIF_R_ASC_AT(w_e, w_i, rate_e, rate_i)
 plt.xlabel("Time (Seconds)")
 plt.ylabel("Membrane Potential (Volts)")
 plt.title("LIF-R-ASC-AT model of a mouse neuron")
@@ -147,18 +147,23 @@ print(spike)
 #     for j in np.arange(0, 20e-9, 1e-9):
 #         heatmap[int(np.true_divide(i, 1e-9))].append(len(LIF_R_ASC_AT(i,j)))
 
-g_e_vec = np.arange(0, 20e-9, 1e-9)
-g_i_vec = np.arange(0, 20e-9, 1e-9)
-heatmap2 = np.zeros((len(g_e_vec),len(g_i_vec)))
+# g_e_vec = np.arange(0, 20e-9, 1e-9)
+# g_i_vec = np.arange(0, 20e-9, 1e-9)
+# heatmap2 = np.zeros((len(g_e_vec),len(g_i_vec)))
 
-for i in range(len(g_e_vec)):
-    for j in range(len(g_i_vec)):        
-        heatmap2[i,j] = len(LIF_R_ASC_AT(g_e_vec[i], g_i_vec[j]))
+# for i in range(len(g_e_vec)):
+#     for j in range(len(g_i_vec)):        
+#         heatmap2[i,j] = len(LIF_R_ASC_AT(g_e_vec[i], g_i_vec[j]))
 
 
 # print(heatmap2)
 
+rate_e_vec = np.arange(0, 1000, 50)
+rate_i_vec = np.arange(0, 1000, 50)
+heatmap2 = np.zeros((len(rate_e_vec),len(rate_i_vec)))
 
-sns.heatmap(pd.DataFrame(data = heatmap2,index = g_e_vec, columns = g_i_vec)).invert_yaxis()
-# plt.pcolormesh(np.arange(0, 20e-9, 5e-9),np.arange(0, 20e-9, 5e-9),heatmap)
+for i in range(len(rate_e_vec)):
+    for j in range(len(rate_i_vec)):        
+        heatmap2[i,j] = len(LIF_R_ASC_AT(w_e, w_i, rate_e_vec[i], rate_i_vec[j]))
+sns.heatmap(heatmap2).invert_yaxis()
 plt.show()
