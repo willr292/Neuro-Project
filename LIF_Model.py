@@ -8,9 +8,15 @@ import seaborn as sns
 import json
 import pandas as pd
 
-with open('neuronal_model_603320017/neuron_config.json') as json_file:  
-    data = json.load(json_file)
+files = ['neuronal_model_597605616/neuron_config.json',
+'neuronal_model_603320017/neuron_config.json',
+'neuronal_model_637930677/neuron_config.json',
+'neuronal_model_591249612/neuron_config.json',
+'neuronal_model_529894099/neuron_config.json']
+out = ['synapse_597605616.eps','synapse_603320017.eps','synapse_637930677.eps','synapse_591249612.eps','synapse_529894099.eps']
 
+with open(files[3]) as json_file:  
+    data = json.load(json_file)
 # Parameters
 C = data['C'] #8.587009771685807e-11 # Capacitance
 R = data['R_input'] #340045253.17350113 # Membrane Resistance
@@ -103,7 +109,7 @@ def LIF_R_ASC_AT(we, wi):
         dI = np.multiply(-1 * k, I[i -1])
         I[i,:] = I[i - 1,:] + dI * dt
 
-        dg_e = -g_e[i -1]/tau_e
+        dg_e = -g_e[i - 1]/tau_e
         g_e[i] = g_e[i - 1] + dg_e * dt
 
         dg_i = -g_i[i -1]/tau_i
@@ -131,13 +137,11 @@ def LIF_R_ASC_AT(we, wi):
         
     return np.asarray(spikes)
 
-spike = LIF_R_ASC_AT(w_e, w_i)
-plt.xlabel("Time (Seconds)")
-plt.ylabel("Membrane Potential (Volts)")
-plt.title("LIF-R-ASC-AT model of a mouse neuron")
-plt.plot(time, V)
-plt.show()
-print(spike)
+#spike = LIF_R_ASC_AT(w_e, w_i)
+
+#plt.plot(time, V)
+#plt.show()
+#print(spike)
 
 
 
@@ -147,13 +151,16 @@ print(spike)
 #     for j in np.arange(0, 20e-9, 1e-9):
 #         heatmap[int(np.true_divide(i, 1e-9))].append(len(LIF_R_ASC_AT(i,j)))
 
-g_e_vec = np.arange(0, 20e-9, 1e-9)
-g_i_vec = np.arange(0, 20e-9, 1e-9)
+g_e_vec = np.linspace(0, 20, 21) * 1e-9#np.arange(0, 20e-9, 1e-9)
+g_i_vec = np.linspace(0, 20, 21) * 1e-9#np.arange(0, 20e-9, 1e-9)
+
 heatmap2 = np.zeros((len(g_e_vec),len(g_i_vec)))
 
 for i in range(len(g_e_vec)):
     for j in range(len(g_i_vec)):        
         heatmap2[i,j] = len(LIF_R_ASC_AT(g_e_vec[i], g_i_vec[j]))
+        if heatmap2[i ,j] > 100:
+            heatmap2[i,j] = 100
 
 
 # print(heatmap2)
@@ -161,4 +168,6 @@ for i in range(len(g_e_vec)):
 
 sns.heatmap(pd.DataFrame(data = heatmap2,index = g_e_vec, columns = g_i_vec)).invert_yaxis()
 # plt.pcolormesh(np.arange(0, 20e-9, 5e-9),np.arange(0, 20e-9, 5e-9),heatmap)
+plt.xlabel("Inhibtory synaptic strength")
+plt.ylabel("Excitatory synaptic strength")
 plt.show()

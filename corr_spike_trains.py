@@ -287,6 +287,6 @@ class correlated_spikes(object):
         fig = plt.figure()
         ax = fig.add_subplot(111)
         for i in range(self.n_proc):
-            ax.plot(self.spikes[:, i] + i, '|k', ms=20, mew=1)
+            ax.plot(self.spikes[:, i] + i, '|k', ms=2, mew=1)
         ax.set_ylim([-.5, self.n_proc + 1])
         ax.set_yticks([])
