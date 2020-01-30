@@ -9,7 +9,7 @@ import pandas as pd
 import json
 
 
-with open('neuronal_model_574054808/neuron_config.json') as json_file:  
+with open('neuronal_model_529894099/neuron_config.json') as json_file:  
     data = json.load(json_file)
 
 # Parameters
@@ -108,13 +108,13 @@ def LIF_ASC(we, wi, rateE, rateI):
         
     return np.asarray(spikes)
 
-spike = LIF_ASC(w_e, w_i, rate_e, rate_i)
-plt.xlabel("Time (Seconds)")
-plt.ylabel("Membrane Potential (Volts)")
-plt.title("LIF-R-ASC-AT model of a mouse neuron")
-plt.plot(time, V)
-plt.show()
-print(spike)
+# spike = LIF_ASC(w_e, w_i, rate_e, rate_i)
+# plt.xlabel("Time (Seconds)")
+# plt.ylabel("Membrane Potential (Volts)")
+# plt.title("LIF-ASC model of a neuron")
+# plt.plot(time, V)
+# plt.show()
+# print(spike)
 
 
 
@@ -135,14 +135,30 @@ print(spike)
 
 # print(heatmap2)
 
-rate_e_vec = np.arange(0, 1000, 50)
-rate_i_vec = np.arange(0, 1000, 50)
+rate_e_vec = np.arange(0, 1050, 50)
+rate_i_vec = np.arange(0, 1050, 50)
 heatmap2 = np.zeros((len(rate_e_vec),len(rate_i_vec)))
 
 for i in range(len(rate_e_vec)):
     for j in range(len(rate_i_vec)):        
         heatmap2[i,j] = len(LIF_ASC(w_e, w_i, rate_e_vec[i], rate_i_vec[j]))
-sns.heatmap(pd.DataFrame(heatmap2, index=rate_i_vec, columns=rate_e_vec)).invert_yaxis()
+
+plt.plot(rate_i_vec, heatmap2[10, :])
+plt.xlabel("Inhibtory synapse firing rate (Hz)")
+plt.ylabel("Output firing rate (Hz)")
+plt.show()
+
+plt.plot(rate_e_vec, heatmap2[:, 10])
+plt.xlabel("Excitatory synapse firing rate (Hz)")
+plt.ylabel("Output firing rate (Hz)")
+plt.show()
+
+slope_i, intercept_i = np.polyfit(rate_i_vec, heatmap2[10, :], 1)
+slope_e, intercept_e = np.polyfit(rate_e_vec, heatmap2[:, 10], 1)
+print(slope_i)
+print(slope_e)
+
+sns.heatmap(pd.DataFrame(heatmap2, index=rate_i_vec, columns=rate_e_vec), cbar_kws={'label': 'Output firing rate (Hz)'}).invert_yaxis()
 plt.xlabel("Inhibtory rate (Hz)")
 plt.ylabel("Excitatory rate (Hz)")
 

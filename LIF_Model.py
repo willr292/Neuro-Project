@@ -12,10 +12,11 @@ files = ['neuronal_model_597605616/neuron_config.json',
 'neuronal_model_603320017/neuron_config.json',
 'neuronal_model_637930677/neuron_config.json',
 'neuronal_model_591249612/neuron_config.json',
-'neuronal_model_529894099/neuron_config.json']
+'neuronal_model_529894099/neuron_config.json',
+'neuronal_model_637930677/neuron_config.json',
+'neuronal_model_591249824/neuron_config.json']
 out = ['synapse_597605616.eps','synapse_603320017.eps','synapse_637930677.eps','synapse_591249612.eps','synapse_529894099.eps']
-
-with open(files[3]) as json_file:  
+with open(files[6]) as json_file:  
     data = json.load(json_file)
 # Parameters
 C = data['C'] #8.587009771685807e-11 # Capacitance
@@ -151,23 +152,37 @@ def LIF_R_ASC_AT(we, wi):
 #     for j in np.arange(0, 20e-9, 1e-9):
 #         heatmap[int(np.true_divide(i, 1e-9))].append(len(LIF_R_ASC_AT(i,j)))
 
-g_e_vec = np.linspace(0, 20, 21) * 1e-9#np.arange(0, 20e-9, 1e-9)
-g_i_vec = np.linspace(0, 20, 21) * 1e-9#np.arange(0, 20e-9, 1e-9)
+g_e_vec = np.linspace(0, 20, 21) * 1e-9 #np.arange(0, 20e-9, 1e-9)
+g_i_vec = np.linspace(0, 20, 21) * 1e-9 #np.arange(0, 20e-9, 1e-9)
 
 heatmap2 = np.zeros((len(g_e_vec),len(g_i_vec)))
 
 for i in range(len(g_e_vec)):
     for j in range(len(g_i_vec)):        
         heatmap2[i,j] = len(LIF_R_ASC_AT(g_e_vec[i], g_i_vec[j]))
-        if heatmap2[i ,j] > 100:
-            heatmap2[i,j] = 100
 
 
-# print(heatmap2)
+plt.plot(heatmap2[10, :])
+plt.xlabel("Inhibtory synaptic strength (nS)")
+plt.ylabel("Output firing rate (Hz)")
+plt.show()
 
+plt.plot(heatmap2[:, 10])
+plt.xlabel("Excitatory synaptic strength (nS)")
+plt.ylabel("Output firing rate (Hz)")
+plt.show()
 
-sns.heatmap(pd.DataFrame(data = heatmap2,index = g_e_vec, columns = g_i_vec)).invert_yaxis()
+slope_i, intercept_i = np.polyfit(heatmap2[10, :], g_i_vec , 1)
+slope_e, intercept_e = np.polyfit(heatmap2[:, 10], g_e_vec , 1)
+print(slope_i)
+print(slope_e)
+
+g_e_vec = np.linspace(0, 20, 21)
+g_i_vec = np.linspace(0, 20, 21)
+
+sns.heatmap(pd.DataFrame(data = heatmap2,index = g_e_vec, columns = g_i_vec), cbar_kws={'label': 'Output firing rate (Hz)'}).invert_yaxis()
 # plt.pcolormesh(np.arange(0, 20e-9, 5e-9),np.arange(0, 20e-9, 5e-9),heatmap)
-plt.xlabel("Inhibtory synaptic strength")
-plt.ylabel("Excitatory synaptic strength")
+
+plt.xlabel("Inhibtory synaptic strength (nS)")
+plt.ylabel("Excitatory synaptic strength (nS)")
 plt.show()
